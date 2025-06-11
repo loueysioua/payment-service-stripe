@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import stripe, { Stripe } from "stripe";
-import { user } from "@/mocked-user";
+import { user } from "@/data/mocked-user";
 import { Config } from "@/config";
 
 const endpointSecret = Config.stripe.webhookKey();
@@ -9,10 +9,13 @@ const endpointSecret = Config.stripe.webhookKey();
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const headersList = await headers();
+
+  //needed to get the event after
   const sig = headersList.get("stripe-signature");
 
   let event: Stripe.Event;
 
+  //get the event
   try {
     event = stripe.webhooks.constructEvent(body, sig!, endpointSecret);
   } catch (err) {
@@ -22,6 +25,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
   // Handle the event
   switch (event.type) {
     case "checkout.session.completed":
@@ -39,6 +43,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
+//update the datatbasee
 async function handleCreditPurchase(
   session: Stripe.Checkout.Session
 ): Promise<void> {

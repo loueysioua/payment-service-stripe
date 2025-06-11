@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
-import { user } from "@/mocked-user";
+import { user } from "@/data/mocked-user";
 
 // Define the expected request body interface
 interface RequestBody {
@@ -11,9 +11,12 @@ interface RequestBody {
 
 export async function POST(req: NextRequest) {
   try {
+    //get payment data : quantity + price
     const formData = await req.formData();
     const priceId = formData.get("priceId") as string;
     const quantity = parseInt(formData.get("quantity") as string);
+
+    // check for payment data
     if (!priceId || !quantity || quantity < 1) {
       return NextResponse.json(
         { error: "Missing or invalid priceId or quantity" },
@@ -42,8 +45,14 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
+
+      //url to success page : sent to stripe
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+
+      //url to cancel page sent to stripe
       cancel_url: `${origin}/?canceled=true`,
+
+      //metadata to be retrieved after payment with stripe (for example to get update the user)
       metadata: {
         userId: user.id,
         creditsBought: quantity * price.unit_amount!,
@@ -58,6 +67,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    //redirection to success or cancel page
     return NextResponse.redirect(session.url, 303);
   } catch (err) {
     console.error("Error creating checkout session:", err);

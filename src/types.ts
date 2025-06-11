@@ -25,9 +25,3 @@ export interface SearchParams {
   canceled?: string;
   session_id?: string;
 }
-
-export interface CheckoutFormData {
-  amount: string;
-  credits: string;
-  type: string;
-}
