@@ -13,23 +13,53 @@ export async function POST(req: NextRequest) {
   try {
     //get payment data : quantity + price
     const formData = await req.formData();
-    const priceId = formData.get("priceId") as string;
-    const quantity = parseInt(formData.get("quantity") as string);
-
-    // check for payment data
-    if (!priceId || !quantity || quantity < 1) {
+    const paymentMode = formData.get("paymentMode") as
+      | "credit-mode"
+      | "subscription-mode";
+    const productId = formData.get("productId") as string;
+    if (!productId || !paymentMode) {
       return NextResponse.json(
-        { error: "Missing or invalid priceId or quantity" },
+        { error: "Missing or invalid information" },
         { status: 400 }
       );
     }
+
     // Validate the price exists and is active
-    const price = await stripe.prices.retrieve(priceId);
-    if (!price.active) {
-      return NextResponse.json(
-        { error: "Price is not active" },
-        { status: 400 }
-      );
+    const priceList = await stripe.prices.list({
+      product: productId,
+      active: true,
+      limit: 1,
+      expand: ["data.product"],
+    });
+
+    const price = priceList.data[0];
+    let quantity = 0;
+
+    const customerList = await stripe.customers.list({
+      email: user.email,
+    });
+
+    let customer = customerList.data[0];
+    if (!customer) {
+      customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          userId: user.id,
+        },
+      });
+    }
+
+    console.log("-----------------------CUSTOMER------------------", customer);
+
+    if (paymentMode === "credit-mode") {
+      quantity = parseInt(formData.get("quantity") as string);
+      // check for payment data
+      if (!quantity || quantity < 1) {
+        return NextResponse.json(
+          { error: "Missing or invalid quantity" },
+          { status: 400 }
+        );
+      }
     }
 
     // Get the origin for success/cancel URLs
@@ -38,13 +68,14 @@ export async function POST(req: NextRequest) {
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
+      customer: customer.id,
       line_items: [
         {
-          price: priceId, // Use the validated priceId
-          quantity: Math.floor(quantity), // Ensure quantity is an integer
+          price: price.id, // Use the validated priceId
+          quantity: paymentMode === "credit-mode" ? Math.floor(quantity) : 1, // Ensure quantity is an integer
         },
       ],
-      mode: "payment",
+      mode: paymentMode === "credit-mode" ? "payment" : "subscription",
 
       //url to success page : sent to stripe
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -55,8 +86,14 @@ export async function POST(req: NextRequest) {
       //metadata to be retrieved after payment with stripe (for example to get update the user)
       metadata: {
         userId: user.id,
-        creditsBought: quantity * price.unit_amount!,
-        type: "credit_purchase",
+        creditsBought:
+          paymentMode === "credit-mode"
+            ? quantity * price.unit_amount!
+            : price.unit_amount,
+        type:
+          paymentMode === "credit-mode"
+            ? "credit_purchase"
+            : "subscription_purchase",
       },
     });
 

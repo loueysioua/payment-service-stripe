@@ -26,24 +26,20 @@ export default async function IndexPage({
         >
           <section>
             <label
-              htmlFor="priceId"
+              htmlFor="productId"
               className="block text-sm font-medium text-gray-700"
             >
               Select Product
             </label>
             <select
-              id="priceId"
-              name="priceId"
+              id="productId"
+              name="productId"
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Choose a product</option>
-              <option value="price_1RYPxEROfAK19A96q3qpmwnn">
-                Basic Plan ($10)
-              </option>
-              <option value="price_1RYPxEROfAK19A96q3qpmwnn">
-                Premium Plan ($20)
-              </option>
+              <option value="123456">35$ Credits</option>
+              <option value="jgouhhlk123">70$ Credits</option>
             </select>
           </section>
 
@@ -63,6 +59,25 @@ export default async function IndexPage({
               required
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
+          </section>
+
+          <section>
+            <label
+              htmlFor="productId"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Select Payment Mode
+            </label>
+            <select
+              id="paymentMode"
+              name="paymentMode"
+              required
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Choose a product</option>
+              <option value="subscription-mode">Subscription</option>
+              <option value="credit-mode">Credit</option>
+            </select>
           </section>
 
           <section>
