@@ -16,9 +16,12 @@ export async function GET() {
         stripeProduct
       );
       const price = await stripe.prices.create({
-        unit_amount: product.price,
-        currency: "usd",
+        unit_amount: product.price * 100,
+        currency: "eur",
         product: stripeProduct.id,
+        recurring: {
+          interval: "month",
+        },
       });
       product.priceId = price.id;
       console.log(

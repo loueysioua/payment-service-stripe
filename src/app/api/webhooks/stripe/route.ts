@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import stripe, { Stripe } from "stripe";
 import { user } from "@/data/mocked-user";
 import { Config } from "@/config";
+import { InvoiceGenerator } from "@/lib/invoice-generator";
+import Stripe from "stripe";
+import { stripe } from "@/lib/stripe";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 const endpointSecret = Config.stripe.webhookKey();
 
@@ -33,9 +41,37 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session;
+      console.log("Session", session);
 
-      if (session.metadata?.type === "credit_purchase") {
+      if (
+        session.mode === "payment"
+        // && session.metadata?.type === "credit_purchase"
+      ) {
         await handleCreditPurchase(session);
+        console.log(
+          "------------------------CREATING INVOICE--------------------------------"
+        );
+
+        const invoice = await InvoiceGenerator.createStripeInvoice(
+          "cus_SUTBOiWgVNLGT5",
+          [
+            {
+              description: "Credits",
+              quantity: 5,
+              unitPrice: 3000,
+              productId: 123456 + "",
+            },
+          ],
+          {
+            dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+            collectionMethod: "charge_automatically",
+            autoAdvance: true,
+          }
+        );
+        console.log(
+          "-------------------Invoice created--------------------------",
+          invoice
+        );
       }
       break;
 
@@ -57,13 +93,15 @@ export async function POST(request: NextRequest) {
       subscription = event.data.object;
       status = subscription.status;
       console.log(`Subscription status is ${status}.`);
+      console.log(subscription.latest_invoice);
       // Then define and call a method to handle the subscription created.
       // handleSubscriptionCreated(subscription);
       break;
     case "customer.subscription.updated":
-      subscription = event.data.object;
+      subscription = event.data.object as Stripe.Subscription;
       status = subscription.status;
       console.log(`Subscription status is ${status}.`);
+
       // Then define and call a method to handle the subscription update.
       // handleSubscriptionUpdated(subscription);
       break;

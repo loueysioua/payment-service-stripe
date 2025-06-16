@@ -1,13 +1,21 @@
+import { user } from "@/data/mocked-user";
 import { stripe } from "@/lib/stripe";
-import { NextRequest } from "next/server";
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function getSession(req: NextRequest) {
-  console.log("-----------req TExt-----------------", req.text());
-  console.log("-------------req formData---------------", req.formData());
-  console.log("-------------req Body---------------", req.body());
-  console.log("---------------------req Json---------------", req.json());
-  // const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId);
-  // const portalSession = await stripe.billingPortal.sessions.create({
-  //   customer: sessionId,
-  // });
+export async function GET(req: NextRequest) {
+  const customerList = await stripe.customers.list({
+    email: user.email,
+  });
+
+  const headersList = await headers();
+  const origin = headersList.get("origin");
+
+  let customer = customerList.data[0];
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: customer.id,
+    return_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+  });
+
+  return NextResponse.redirect(portalSession.url, 303);
 }

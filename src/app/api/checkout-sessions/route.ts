@@ -1,7 +1,9 @@
+import { products } from "@/data/mocked-product";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { user } from "@/data/mocked-user";
+import { InvoiceGenerator } from "@/lib/invoice-generator";
 
 // Define the expected request body interface
 interface RequestBody {
@@ -40,6 +42,11 @@ export async function POST(req: NextRequest) {
     });
 
     let customer = customerList.data[0];
+    customer &&
+      console.log(
+        "-----------------------CUSTOMER EXISTS------------------",
+        customer
+      );
     if (!customer) {
       customer = await stripe.customers.create({
         email: user.email,
@@ -47,9 +54,28 @@ export async function POST(req: NextRequest) {
           userId: user.id,
         },
       });
+      console.log(
+        "-----------------------CUSTOMER CREATED------------------",
+        customer
+      );
     }
 
-    console.log("-----------------------CUSTOMER------------------", customer);
+    if (paymentMode === "subscription-mode") {
+      const hasActiveSubscription = await checkForActiveSubscription(
+        customer.id,
+        productId
+      );
+
+      if (hasActiveSubscription) {
+        return NextResponse.json(
+          {
+            error: "You already have an active subscription for this product.",
+            code: "SUBSCRIPTION_EXISTS",
+          },
+          { status: 409 } // conflict
+        );
+      }
+    }
 
     if (paymentMode === "credit-mode") {
       quantity = parseInt(formData.get("quantity") as string);
@@ -94,6 +120,10 @@ export async function POST(req: NextRequest) {
           paymentMode === "credit-mode"
             ? "credit_purchase"
             : "subscription_purchase",
+        customerId: customer.id,
+        quantity: quantity,
+        unitPrice: price.unit_amount,
+        productId: productId,
       },
     });
 
@@ -112,5 +142,41 @@ export async function POST(req: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+async function checkForActiveSubscription(
+  customerId: string,
+  productId: string
+): Promise<boolean> {
+  try {
+    // Get all subscriptions for the customer
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "all",
+      limit: 100, // Increase limit to catch all subscriptions
+    });
+
+    // Check if any subscription is active for this product
+    const activeSubscription = subscriptions.data.find((subscription) => {
+      // Check subscription status
+      const isActiveStatus = ["active", "trialing", "past_due"].includes(
+        subscription.status
+      );
+
+      if (!isActiveStatus) return false;
+
+      // Check if subscription contains the product
+      return subscription.items.data.some((item) => {
+        return item.price.product === productId;
+      });
+    });
+
+    return !!activeSubscription;
+  } catch (error) {
+    console.error("Error checking for active subscription:", error);
+    // In case of error, be conservative and assume no subscription exists
+    // You might want to handle this differently based on your business logic
+    return false;
   }
 }
