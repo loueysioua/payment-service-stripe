@@ -1,8 +1,24 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
 
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
 ## Project Structure
 
 This document outlines the organization of the project, designed to maintain a clean, modular, and scalable codebase. The structure is built around a Next.js application using the App Router, with clear separation of concerns for components, utilities, services, types, and configurations.
+
+```bash
 src/
 ├── app/ # Next.js App Router for routing and pages
 │ ├── api/ # API routes for backend functionality
@@ -36,6 +52,7 @@ src/
 │ └── common/ # Shared types across the application
 ├── config/ # Configuration files (e.g., environment settings)
 └── data/ # Mock data for development and testing
+```
 
 Overview
 
@@ -48,20 +65,6 @@ config/: Holds configuration files for environment settings and other app-wide c
 data/: Provides mock data to support development and testing workflows.
 
 This structure promotes maintainability, scalability, and separation of concerns, making it easy to extend and manage the codebase.
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
