@@ -1,54 +1,41 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-
 ## Project Structure
 
 This document outlines the organization of the project, designed to maintain a clean, modular, and scalable codebase. The structure is built around a Next.js application using the App Router, with clear separation of concerns for components, utilities, services, types, and configurations.
 src/
-├── app/                          # Next.js App Router for routing and pages
-│   ├── api/                      # API routes for backend functionality
-│   │   ├── checkout-sessions/    # Handles checkout session creation
-│   │   ├── portal-session/       # Manages billing portal sessions
-│   │   ├── products/             # Product-related API endpoints
-│   │   └── webhooks/             # Webhook handlers for external services
-│   ├── components/               # Page-specific React components
-│   ├── (routes)/                # Grouped routes for page organization
-│   │   ├── checkout/             # Checkout page and related logic
-│   │   ├── success/              # Success page for completed actions
-│   │   └── credits-purchase/     # Credits purchase page and logic
-│   └── globals.css               # Global CSS styles
-├── components/                   # Reusable UI components
-│   ├── ui/                       # Base UI components (e.g., buttons, modals)
-│   ├── forms/                    # Form components for user input
-│   └── layouts/                  # Layout components for page structure
-├── lib/                          # Utility libraries and helpers
-│   ├── stripe/                   # Stripe-related utility functions
-│   ├── validators/               # Input validation logic
-│   ├── utils/                    # General-purpose utility functions
-│   └── constants/                # Application-wide constants
-├── services/                     # Business logic layer
-│   ├── stripe/                   # Stripe service integrations
-│   ├── customer/                 # Customer management logic
-│   ├── invoice/                  # Invoice handling and processing
-│   └── subscription/             # Subscription management logic
-├── types/                        # TypeScript type definitions
-│   ├── api/                      # Types for API requests/responses
-│   ├── stripe/                   # Types for Stripe integrations
-│   └── common/                   # Shared types across the application
-├── config/                       # Configuration files (e.g., environment settings)
-└── data/                         # Mock data for development and testing
+├── app/ # Next.js App Router for routing and pages
+│ ├── api/ # API routes for backend functionality
+│ │ ├── checkout-sessions/ # Handles checkout session creation
+│ │ ├── portal-session/ # Manages billing portal sessions
+│ │ ├── products/ # Product-related API endpoints
+│ │ └── webhooks/ # Webhook handlers for external services
+│ ├── components/ # Page-specific React components
+│ ├── (routes)/ # Grouped routes for page organization
+│ │ ├── checkout/ # Checkout page and related logic
+│ │ ├── success/ # Success page for completed actions
+│ │ └── credits-purchase/ # Credits purchase page and logic
+│ └── globals.css # Global CSS styles
+├── components/ # Reusable UI components
+│ ├── ui/ # Base UI components (e.g., buttons, modals)
+│ ├── forms/ # Form components for user input
+│ └── layouts/ # Layout components for page structure
+├── lib/ # Utility libraries and helpers
+│ ├── stripe/ # Stripe-related utility functions
+│ ├── validators/ # Input validation logic
+│ ├── utils/ # General-purpose utility functions
+│ └── constants/ # Application-wide constants
+├── services/ # Business logic layer
+│ ├── stripe/ # Stripe service integrations
+│ ├── customer/ # Customer management logic
+│ ├── invoice/ # Invoice handling and processing
+│ └── subscription/ # Subscription management logic
+├── types/ # TypeScript type definitions
+│ ├── api/ # Types for API requests/responses
+│ ├── stripe/ # Types for Stripe integrations
+│ └── common/ # Shared types across the application
+├── config/ # Configuration files (e.g., environment settings)
+└── data/ # Mock data for development and testing
 
 Overview
 
@@ -62,6 +49,18 @@ data/: Provides mock data to support development and testing workflows.
 
 This structure promotes maintainability, scalability, and separation of concerns, making it easy to extend and manage the codebase.
 
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
