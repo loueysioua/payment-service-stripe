@@ -1,4 +1,4 @@
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/config/stripe";
 import { redirect } from "next/navigation";
 
 export default async function Success({ searchParams }) {

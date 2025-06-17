@@ -1,4 +1,4 @@
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/config/stripe";
 import { Invoice } from "@/types/invoices/invoice.types";
 
 export class InvoiceGenerator {

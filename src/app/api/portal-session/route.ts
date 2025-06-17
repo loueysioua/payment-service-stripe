@@ -1,5 +1,5 @@
 import { user } from "@/data/mocked-user";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/config/stripe";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 

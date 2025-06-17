@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { user } from "@/data/mocked-user";
-import { Config } from "@/config";
+import { Config } from "@/config/env";
 import { InvoiceGenerator } from "@/lib/invoice-generator";
 import Stripe from "stripe";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/config/stripe";
 
 export const config = {
   api: {

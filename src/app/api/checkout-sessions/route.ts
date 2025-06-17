@@ -1,7 +1,7 @@
 import { products } from "@/data/mocked-product";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/config/stripe";
 import { user } from "@/data/mocked-user";
 import { InvoiceGenerator } from "@/lib/invoice-generator";
 
