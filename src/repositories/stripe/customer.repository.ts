@@ -3,6 +3,15 @@ import type Stripe from "stripe";
 
 export class StripeCustomerRepository {
   private readonly stripe = getStripeInstance();
+  private static instance: StripeCustomerRepository;
+
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new StripeCustomerRepository();
+    }
+    return this.instance;
+  }
 
   async findByEmail(email: string): Promise<Stripe.Customer | null> {
     const customers = await this.stripe.customers.list({

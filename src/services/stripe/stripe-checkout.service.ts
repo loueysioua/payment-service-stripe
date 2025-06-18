@@ -13,9 +13,18 @@ import { ApiError, StripeError } from "@/lib/errors/api-errors";
 
 export class StripeCheckoutService {
   private readonly stripe = getStripeInstance();
-  private readonly customerRepo = new StripeCustomerRepository();
-  private readonly priceRepo = new StripePriceRepository();
-  private readonly subscriptionRepo = new StripeSubscriptionRepository();
+  private static instance: StripeCheckoutService;
+  private readonly customerRepo = StripeCustomerRepository.getInstance();
+  private readonly priceRepo = StripePriceRepository.getInstance();
+  private readonly subscriptionRepo =
+    StripeSubscriptionRepository.getInstance();
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new StripeCheckoutService();
+    }
+    return this.instance;
+  }
 
   async createCheckoutSession(
     params: CreateCheckoutSessionParams

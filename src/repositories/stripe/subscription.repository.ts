@@ -3,6 +3,14 @@ import type Stripe from "stripe";
 
 export class StripeSubscriptionRepository {
   private readonly stripe = getStripeInstance();
+  private static instance: StripeSubscriptionRepository;
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new StripeSubscriptionRepository();
+    }
+    return this.instance;
+  }
 
   async findActiveByCustomerAndProduct(
     customerId: string,

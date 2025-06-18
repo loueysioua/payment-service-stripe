@@ -3,6 +3,15 @@ import type Stripe from "stripe";
 
 export class StripePriceRepository {
   private readonly stripe = getStripeInstance();
+  private static instance: StripePriceRepository;
+
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new StripePriceRepository();
+    }
+    return this.instance;
+  }
 
   async findByProductId(productId: string): Promise<Stripe.Price | null> {
     const prices = await this.stripe.prices.list({
