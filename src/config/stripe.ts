@@ -7,6 +7,7 @@ export const getStripeInstance = (): Stripe => {
   if (!stripeInstance) {
     stripeInstance = new Stripe(env.stripe.secretKey, {
       apiVersion: "2025-05-28.basil",
+      typescript: true,
     });
   }
   return stripeInstance;

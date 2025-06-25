@@ -17,5 +17,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "typescript": "^5"
-  }
+  },
+  "dev": "next dev -H 0.0.0.0"
 }

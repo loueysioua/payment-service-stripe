@@ -1,12 +1,19 @@
-import { NextRequest } from "next/server";
 import { headers } from "next/headers";
 import { StripeWebhookService } from "@/services/stripe/stripe-webhook.service";
 import { ApiResponseBuilder } from "@/lib/utils/api-response";
 import { handleApiError } from "@/lib/errors/error-handler";
+import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export async function POST(request: Request) {
   try {
-    const body = await request.body();
+    const body = (await request.body?.getReader().read()).value;
+    console.log(body);
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
 
@@ -16,7 +23,6 @@ export async function POST(request: NextRequest) {
 
     const webhookService = StripeWebhookService.getInstance();
     const event = await webhookService.constructEvent(body, signature);
-
     await webhookService.handleEvent(event);
 
     return ApiResponseBuilder.success({ received: true });

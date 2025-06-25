@@ -1,4 +1,4 @@
-import { stripe } from "@/config/stripe";
+import { getStripeInstance } from "@/config/stripe";
 import { redirect } from "next/navigation";
 
 export default async function Success({ searchParams }) {
@@ -7,12 +7,10 @@ export default async function Success({ searchParams }) {
   if (!session_id)
     throw new Error("Please provide a valid session_id (`cs_test_...`)");
 
-  const {
-    status,
-    customer_details: { email: customerEmail },
-  } = await stripe.checkout.sessions.retrieve(session_id, {
-    expand: ["line_items", "payment_intent"],
-  });
+  const { status, customer_details } =
+    await getStripeInstance().checkout.sessions.retrieve(session_id, {
+      expand: ["line_items", "payment_intent"],
+    });
 
   if (status === "open") {
     return redirect("/");
@@ -23,7 +21,7 @@ export default async function Success({ searchParams }) {
       <section id="success">
         <p>
           We appreciate your business! A confirmation email will be sent to{" "}
-          {customerEmail}. If you have any questions, please email{" "}
+          {customer_details?.email}. If you have any questions, please email{" "}
         </p>
         <a href="mailto:orders@example.com">orders@example.com</a>.
       </section>

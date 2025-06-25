@@ -1,5 +1,4 @@
 import { getStripeInstance } from "@/config/stripe";
-import { InvoiceGenerator } from "@/lib/invoice-generator";
 import { env } from "@/config/env";
 import type Stripe from "stripe";
 import { UserService } from "../user.service";
@@ -91,25 +90,6 @@ export class StripeWebhookService {
   ): Promise<void> {
     try {
       const { customerId, quantity, unitPrice, productId } = session.metadata!;
-
-      const invoice = await InvoiceGenerator.createStripeInvoice(
-        customerId,
-        [
-          {
-            description: "Credits",
-            quantity: parseInt(quantity),
-            unitPrice: parseInt(unitPrice),
-            productId,
-          },
-        ],
-        {
-          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          collectionMethod: "charge_automatically",
-          autoAdvance: true,
-        }
-      );
-
-      console.log("Invoice created:", invoice.id);
     } catch (error) {
       console.error("Error creating invoice:", error);
     }
