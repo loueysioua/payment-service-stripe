@@ -1,7 +1,7 @@
 import { user } from "@/data/mocked-user";
-import { stripe } from "@/config/stripe";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/config/stripe";
 
 export async function GET(req: NextRequest) {
   const customerList = await stripe.customers.list({

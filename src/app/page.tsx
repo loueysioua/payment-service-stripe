@@ -1,7 +1,7 @@
 export default async function IndexPage({
   searchParams,
 }: {
-  searchParams: { canceled?: string };
+  searchParams: any;
 }) {
   const { canceled } = await searchParams;
 

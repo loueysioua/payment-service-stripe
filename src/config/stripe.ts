@@ -12,3 +12,5 @@ export const getStripeInstance = (): Stripe => {
   }
   return stripeInstance;
 };
+
+export const stripe = getStripeInstance();

@@ -10,19 +10,24 @@ export const config = {
   },
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = (await request.body?.getReader().read()).value;
-    console.log(body);
+    console.log(
+      "-------------------------event received----------------------"
+    );
+    const body = await request.arrayBuffer();
+    const rawBody = Buffer.from(body);
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
+    console.log("Signature:", signature);
+    console.log("Raw body (base64):", rawBody);
 
     if (!signature) {
       return ApiResponseBuilder.error("Missing stripe signature", 400);
     }
 
     const webhookService = StripeWebhookService.getInstance();
-    const event = await webhookService.constructEvent(body, signature);
+    const event = await webhookService.constructEvent(rawBody, signature);
     await webhookService.handleEvent(event);
 
     return ApiResponseBuilder.success({ received: true });

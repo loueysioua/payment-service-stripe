@@ -1,5 +1,9 @@
-export default async function CreditsPurchase({ searchParams }) {
-  const { success, canceled, session_id } = searchParams;
+export default async function CreditsPurchase({
+  searchParams,
+}: {
+  searchParams: any;
+}) {
+  const { success, canceled, session_id } = await searchParams;
 
   if (success) {
     return (
