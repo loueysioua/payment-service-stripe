@@ -15,12 +15,10 @@ export async function POST(request: NextRequest) {
     console.log(
       "-------------------------event received----------------------"
     );
-    const body = await request.arrayBuffer();
-    const rawBody = Buffer.from(body);
+    const body = await request.body;
+    const rawBody = (await body?.getReader().read())?.value;
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
-    console.log("Signature:", signature);
-    console.log("Raw body (base64):", rawBody);
 
     if (!signature) {
       return ApiResponseBuilder.error("Missing stripe signature", 400);

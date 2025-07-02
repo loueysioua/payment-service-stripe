@@ -38,10 +38,8 @@ export default async function IndexPage({
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Choose a product</option>
-              <option value="basic_123456789">35$ Credits</option>
-              <option value="prenium_123456789">70$ Credits</option>
+              <option value="prenium_123456789">70EUR Subscription</option>
               <option value="123456">35EUR Credits</option>
-              <option value="jgouhhlk123">70EUR Credits</option>
             </select>
           </section>
 

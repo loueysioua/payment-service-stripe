@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  credits   Int      @default(0)
+  stripeCustomerId String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // address fields: city, country, postal code, state, street
+  city     String
+  country  String
+  postal   String
+  state    String
+  street   String
+
+  // Relations
+  creditPurchases CreditPurchase[]
+  subscriptions      UserSubscription[]
+}
+
+model Plan {
+  id          String  @id
+  name        String
+  description String?
+  price       Int     // Price in cents
+  currency    String  @default("eur")
+  image       String?
+  priceId     String?
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creditTransactions CreditPurchase[]
+  subscriptions      UserSubscription[]
+
+  @@map("products")
+}
+
+model CreditPurchase {
+  id        String            @id @default(cuid())
+  userId    String
+  stripePaymentIntentId String? @unique
+  quantity  Int
+  planId String
+  totalAmount    Int?            
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+  invoice Invoice?
+  @@map("credit_transactions")
+}
+
+model UserSubscription {
+  id                 String           @id @default(cuid())
+  userId             String
+  planId          String
+  stripeSubscriptionId String         @unique
+  status             SubscriptionStatus
+  startDate DateTime
+  endDate   DateTime
+  cancelAtPeriodEnd  Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  invoiceId          String?    @unique
+
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+  invoice Invoice?
+
+  @@unique([userId, planId])
+  @@map("user_subscriptions")
+}
+
+model Invoice {
+  id String @id @default(cuid())
+  userSubscriptionId String? @unique
+  creditPurchaseId String?  @unique
+  stripeInvoiceId String? @unique
+  totalAmount Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status InvoiceStatus
+  pdfUrl String?
+
+  // Relations
+  userSubscription UserSubscription? @relation(fields: [userSubscriptionId], references: [id])
+  creditPurchase CreditPurchase? @relation(fields: [creditPurchaseId], references: [id])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+}
+
+enum InvoiceStatus {
+  OPEN
+  PAID
+  UNPAID
+  VOID
+  EXPIRED
+  FAILED
+  CANCELED
+}
