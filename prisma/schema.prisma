@@ -124,4 +124,5 @@ enum InvoiceStatus {
   EXPIRED
   FAILED
   CANCELED
+  PENDING 
 }

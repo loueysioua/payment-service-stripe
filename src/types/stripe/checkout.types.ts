@@ -1,6 +1,6 @@
 export interface CreateCheckoutSessionParams {
   productId: string;
-  paymentMode: "credit-mode" | "subscription-mode";
+  paymentMode: "credit-purchase" | "subscription";
   quantity?: number;
   userId: string;
   customerEmail: string;

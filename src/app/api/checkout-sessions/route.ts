@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
     const rawData = {
       productId: formData.get("productId") as string,
       paymentMode: formData.get("paymentMode") as
-        | "credit-mode"
-        | "subscription-mode",
+        | "credit-purchase"
+        | "subscription",
       quantity: formData.get("quantity")
         ? parseInt(formData.get("quantity") as string)
         : undefined,
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // Validate quantity for credit mode
     if (
-      validatedData.paymentMode === "credit-mode" &&
+      validatedData.paymentMode === "credit-purchase" &&
       !validatedData.quantity
     ) {
       throw new ValidationError("Quantity is required for credit mode");

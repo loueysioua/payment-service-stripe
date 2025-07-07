@@ -43,7 +43,7 @@ export class StripeCheckoutService {
       );
 
       // Check for existing subscription if subscription mode
-      if (params.paymentMode === "subscription-mode") {
+      if (params.paymentMode === "subscription") {
         const hasActiveSubscription =
           await this.subscriptionRepo.hasActiveSubscription(
             customer.id,
@@ -61,9 +61,9 @@ export class StripeCheckoutService {
 
       // Validate quantity for credit mode
       const quantity =
-        params.paymentMode === "credit-mode" ? params.quantity || 1 : 1;
+        params.paymentMode === "credit-purchase" ? params.quantity || 1 : 1;
 
-      if (params.paymentMode === "credit-mode" && quantity < 1) {
+      if (params.paymentMode === "credit-purchase" && quantity < 1) {
         throw new ApiError(400, "Invalid quantity");
       }
 
@@ -76,7 +76,8 @@ export class StripeCheckoutService {
             quantity: Math.floor(quantity),
           },
         ],
-        mode: params.paymentMode === "credit-mode" ? "payment" : "subscription",
+        mode:
+          params.paymentMode === "credit-purchase" ? "payment" : "subscription",
         success_url: `${env.app.baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${env.app.baseUrl}/?canceled=true`,
         metadata: this.buildSessionMetadata(
@@ -114,11 +115,11 @@ export class StripeCheckoutService {
     const metadata: CheckoutSessionMetadata = {
       userId: params.userId,
       creditsBought:
-        params.paymentMode === "credit-mode"
+        params.paymentMode === "credit-purchase"
           ? quantity * price.unit_amount!
           : price.unit_amount,
       type:
-        params.paymentMode === "credit-mode"
+        params.paymentMode === "credit-purchase"
           ? "credit_purchase"
           : "subscription_purchase",
       customerId,

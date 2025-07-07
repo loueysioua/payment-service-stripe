@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const checkoutSessionSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
-  paymentMode: z.enum(["credit-mode", "subscription-mode"]),
+  paymentMode: z.enum(["credit-purchase", "subscription"]),
   quantity: z.number().min(1).optional(),
 });
 
