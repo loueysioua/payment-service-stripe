@@ -2,9 +2,14 @@ import { NextRequest } from "next/server";
 import { StripeCheckoutService } from "@/services/stripe/stripe-checkout.service";
 import { checkoutSessionSchema } from "@/lib/validations/checkout.validation";
 import { ApiResponseBuilder } from "@/lib/utils/api-response";
-import { user } from "@/data/mocked-user";
 import { ValidationError } from "@/lib/errors/api-errors";
 import { handleApiError } from "@/lib/errors/error-handler";
+
+// For demo purposes - replace with actual user authentication
+const DEMO_USER = {
+  id: "cmct55uwc0000ijs59cm86mej",
+  email: "alice@gmail.com",
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,8 +41,8 @@ export async function POST(req: NextRequest) {
     const checkoutService = StripeCheckoutService.getInstance();
     const result = await checkoutService.createCheckoutSession({
       ...validatedData,
-      userId: user.id,
-      customerEmail: user.email,
+      userId: DEMO_USER.id,
+      customerEmail: DEMO_USER.email,
     });
 
     return ApiResponseBuilder.redirect(result.url);

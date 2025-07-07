@@ -30,7 +30,7 @@ export class StripePriceRepository {
     recurring?: { interval: "month" | "year" }
   ): Promise<Stripe.Price> {
     return this.stripe.prices.create({
-      unit_amount: unitAmount * 100,
+      unit_amount: unitAmount,
       currency,
       product: productId,
       ...(recurring && { recurring }),

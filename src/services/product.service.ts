@@ -1,11 +1,14 @@
+import { PlanRepository } from "@/repositories/plan.repository";
 import { StripeProductRepository } from "@/repositories/stripe/product.repository";
 import { StripePriceRepository } from "@/repositories/stripe/price.repository";
-import type { Product } from "@/types/products/product.types";
+import { Plan } from "@prisma/client";
+import { ApiError } from "@/lib/errors/api-errors";
 
 export class ProductService {
   private static instance: ProductService;
-  private readonly productRepo = StripeProductRepository.getInstance();
-  private readonly priceRepo = StripePriceRepository.getInstance();
+  private readonly planRepo = PlanRepository.getInstance();
+  private readonly stripeProductRepo = StripeProductRepository.getInstance();
+  private readonly stripePriceRepo = StripePriceRepository.getInstance();
 
   private constructor() {}
 
@@ -16,81 +19,86 @@ export class ProductService {
     return this.instance;
   }
 
-  async createProduct(productData: Omit<Product, "priceId">): Promise<Product> {
+  async getAllPlans(): Promise<Plan[]> {
+    return this.planRepo.findAll(true);
+  }
+
+  async getPlanById(planId: string): Promise<Plan | null> {
+    return this.planRepo.findById(planId);
+  }
+
+  async createPlan(planData: {
+    name: string;
+    description?: string;
+    price: number;
+    currency?: string;
+    image?: string;
+  }): Promise<Plan> {
     try {
-      // Create product in Stripe
-      const stripeProduct = await this.productRepo.create({
-        id: productData.id,
-        name: productData.name,
-        description: productData.description,
-        images: productData.image ? [productData.image] : undefined,
+      // Create product in Stripe first
+      const stripeProduct = await this.stripeProductRepo.create({
+        name: planData.name,
+        description: planData.description,
+        images: planData.image ? [planData.image] : undefined,
       });
 
       // Create price for the product
-      const price = await this.priceRepo.create(
+      const price = await this.stripePriceRepo.create(
         stripeProduct.id,
-        productData.price,
-        "eur",
+        planData.price,
+        planData.currency || "eur",
         { interval: "month" }
       );
 
-      return {
-        ...productData,
+      // Create plan in database
+      const plan = await this.planRepo.create({
+        id: stripeProduct.id,
+        name: planData.name,
+        description: planData.description,
+        price: planData.price * 100, // Store in cents
+        currency: planData.currency || "eur",
+        image: planData.image,
         priceId: price.id,
-      };
+      });
+
+      return plan;
     } catch (error) {
-      console.error("Error creating product:", error);
-      throw error;
+      console.error("Error creating plan:", error);
+      throw new ApiError(500, "Failed to create plan");
     }
   }
 
-  async createMultipleProducts(
-    products: Omit<Product, "priceId">[]
-  ): Promise<Product[]> {
-    const createdProducts = await Promise.allSettled(
-      products.map((product) => this.createProduct(product))
-    );
+  async ensurePlansExist(
+    plans: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      price: number;
+      currency?: string;
+      image?: string;
+    }>
+  ): Promise<Plan[]> {
+    const results: Plan[] = [];
 
-    const results: Product[] = [];
-    const errors: Error[] = [];
+    for (const planData of plans) {
+      let plan = await this.planRepo.findById(planData.id);
 
-    createdProducts.forEach((result, index) => {
-      if (result.status === "fulfilled") {
-        results.push(result.value);
-      } else {
-        errors.push(
-          new Error(
-            `Failed to create product ${products[index].name}: ${result.reason}`
-          )
+      if (!plan) {
+        plan = await this.createPlan(planData);
+      } else if (!plan.priceId) {
+        // Update existing plan with Stripe price ID
+        const price = await this.stripePriceRepo.create(
+          plan.id,
+          plan.price,
+          plan.currency,
+          { interval: "month" }
         );
+        plan = await this.planRepo.updatePriceId(plan.id, price.id);
       }
-    });
 
-    if (errors.length > 0) {
-      console.error("Some products failed to create:", errors);
+      results.push(plan);
     }
 
     return results;
-  }
-
-  async getProductById(productId: string): Promise<Product | null> {
-    try {
-      const stripeProduct = await this.productRepo.findById(productId);
-      if (!stripeProduct) return null;
-
-      const price = await this.priceRepo.findByProductId(productId);
-
-      return {
-        id: stripeProduct.id,
-        name: stripeProduct.name,
-        description: stripeProduct.description || "",
-        price: price ? price.unit_amount! / 100 : 0,
-        image: stripeProduct.images?.[0] || "",
-        priceId: price?.id || "",
-      };
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      return null;
-    }
   }
 }

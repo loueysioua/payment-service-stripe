@@ -15,7 +15,6 @@ export class StripeProductRepository {
   }
 
   async create(productData: {
-    id: string;
     name: string;
     description?: string;
     images?: string[];

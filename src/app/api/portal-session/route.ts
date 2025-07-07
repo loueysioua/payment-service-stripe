@@ -1,4 +1,4 @@
-import { user } from "@/data/mocked-user";
+import { user } from "@/data/seed/users.seed";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/config/stripe";

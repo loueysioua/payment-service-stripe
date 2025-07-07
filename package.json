@@ -7,8 +7,12 @@
     "build": "next build",
     "start": "next start"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^6.11.0",
+    "@prisma/extension-accelerate": "^2.0.2",
     "@stripe/stripe-js": "^7.3.1",
     "next": "^15.3.3",
     "stripe": "^18.2.1",
